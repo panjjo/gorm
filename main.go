@@ -28,6 +28,8 @@ type DB struct {
 	callbacks     *Callback
 	dialect       Dialect
 	singularTable bool
+
+	rawSql *RawSqls
 }
 
 // Open initialize a new db connection, need to import driver first, e.g:
@@ -69,6 +71,7 @@ func Open(dialect string, args ...interface{}) (db *DB, err error) {
 		values:    map[string]interface{}{},
 		callbacks: DefaultCallback,
 		dialect:   newDialect(dialect, dbSQL),
+		rawSql:    newRawSqls(),
 	}
 	db.parent = db
 	if err != nil {
@@ -466,6 +469,9 @@ func (s *DB) Begin() *DB {
 	if db, ok := c.db.(sqlDb); ok && db != nil {
 		tx, err := db.Begin()
 		c.db = interface{}(tx).(SQLCommon)
+		if err == nil {
+			c.rawSql = newRawSqls()
+		}
 		c.AddError(err)
 	} else {
 		c.AddError(ErrCantStartTransaction)
@@ -720,6 +726,8 @@ func (s *DB) clone() *DB {
 		Value:             s.Value,
 		Error:             s.Error,
 		blockGlobalUpdate: s.blockGlobalUpdate,
+
+		rawSql: s.rawSql,
 	}
 
 	for key, value := range s.values {
@@ -747,7 +755,21 @@ func (s *DB) log(v ...interface{}) {
 }
 
 func (s *DB) slog(sql string, t time.Time, vars ...interface{}) {
+	switch string([]rune(sql)[:6]) {
+	case "INSERT", "UPDATE", "DELETE":
+		//	Color_Cyan.Println(sql, vars)
+		s.rawSql.add(RawSql{
+			Sql:  sql,
+			Vars: vars,
+		})
+	default:
+		//fmt.Println(string([]rune(sql)[:6]), sql, vars)
+	}
 	if s.logMode == 2 {
 		s.print("sql", fileWithLineNum(), NowFunc().Sub(t), sql, vars, s.RowsAffected)
 	}
+}
+
+func (s *DB) RawSqls() []RawSql {
+	return s.rawSql.RawSql
 }
