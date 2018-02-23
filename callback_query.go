@@ -8,6 +8,7 @@ import (
 
 // Define callbacks for querying
 func init() {
+	DefaultCallback.Query().Register("gorm:befor_query", beforQueryCallback)
 	DefaultCallback.Query().Register("gorm:query", queryCallback)
 	DefaultCallback.Query().Register("gorm:preload", preloadCallback)
 	DefaultCallback.Query().Register("gorm:after_query", afterQueryCallback)
@@ -84,6 +85,13 @@ func queryCallback(scope *Scope) {
 				scope.Err(ErrRecordNotFound)
 			}
 		}
+	}
+}
+
+// beforQueryCallback will invoke `BeforFind` method befor querying
+func beforQueryCallback(scope *Scope) {
+	if !scope.HasError() {
+		scope.CallMethod("BeforFind")
 	}
 }
 
