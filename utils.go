@@ -26,8 +26,8 @@ var NowFunc = func() time.Time {
 var commonInitialisms = []string{"API", "ASCII", "CPU", "CSS", "DNS", "EOF", "GUID", "HTML", "HTTP", "HTTPS", "ID", "IP", "JSON", "LHS", "QPS", "RAM", "RHS", "RPC", "SLA", "SMTP", "SSH", "TLS", "TTL", "UID", "UI", "UUID", "URI", "URL", "UTF8", "VM", "XML", "XSRF", "XSS"}
 var commonInitialismsReplacer *strings.Replacer
 
-var goSrcRegexp = regexp.MustCompile(`jinzhu/gorm/.*.go`)
-var goTestRegexp = regexp.MustCompile(`jinzhu/gorm/.*test.go`)
+var goSrcRegexp = regexp.MustCompile(`nzlov/gorm/.*.go`)
+var goTestRegexp = regexp.MustCompile(`nzlov/gorm/.*test.go`)
 
 func init() {
 	var commonInitialismsForReplacer []string
@@ -175,13 +175,20 @@ func toQueryValues(values [][]interface{}) (results []interface{}) {
 }
 
 func fileWithLineNum() string {
-	for i := 2; i < 15; i++ {
+	str := ""
+	for i := 2; i < 7; i++ {
 		_, file, line, ok := runtime.Caller(i)
-		if ok && (!goSrcRegexp.MatchString(file) || goTestRegexp.MatchString(file)) {
-			return fmt.Sprintf("%v:%v", file, line)
+		// if ok && (!goSrcRegexp.MatchString(file) || goTestRegexp.MatchString(file)) {
+		if ok {
+			// if !goSrcRegexp.MatchString(file) || goTestRegexp.MatchString(file) {
+			str += fmt.Sprintf("%v:%v\n", file, line)
+			// }
+		} else {
+			return str
 		}
+		// }
 	}
-	return ""
+	return str
 }
 
 func isBlank(value reflect.Value) bool {
