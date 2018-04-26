@@ -14,8 +14,10 @@ func preloadCallback(scope *Scope) {
 		return
 	}
 
-	if _, ok := scope.Get("gorm:auto_preload"); ok {
-		autoPreload(scope)
+	if v, ok := scope.Get("gorm:auto_preload"); ok {
+		if b, ok := v.(bool); ok && b {
+			autoPreload(scope)
+		}
 	}
 
 	if scope.Search.preload == nil || scope.HasError() {
