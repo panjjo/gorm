@@ -13,9 +13,12 @@ func preloadCallback(scope *Scope) {
 	if _, skip := scope.InstanceGet("gorm:skip_query_callback"); skip {
 		return
 	}
-
-	if v, ok := scope.Get("gorm:auto_preload"); ok {
-		if b, ok := v.(bool); ok && b {
+	if ap, ok := scope.Get("gorm:auto_preload"); ok {
+		// If gorm:auto_preload IS NOT a bool then auto preload.
+		// Else if it IS a bool, use the value
+		if apb, ok := ap.(bool); !ok {
+			autoPreload(scope)
+		} else if apb {
 			autoPreload(scope)
 		}
 	}

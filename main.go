@@ -1,11 +1,13 @@
 package gorm
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
 	"reflect"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -165,7 +167,7 @@ func (s *DB) HasBlockGlobalUpdate() bool {
 
 // SingularTable use singular table by default
 func (s *DB) SingularTable(enable bool) {
-	modelStructsMap = newModelStructsMap()
+	modelStructsMap = sync.Map{}
 	s.parent.singularTable = enable
 }
 
@@ -489,6 +491,21 @@ func (s *DB) Begin() *DB {
 	c := s.clone()
 	if db, ok := c.db.(sqlDb); ok && db != nil {
 		tx, err := db.Begin()
+		c.db = interface{}(tx).(SQLCommon)
+
+		c.dialect.SetDB(c.db)
+		c.AddError(err)
+	} else {
+		c.AddError(ErrCantStartTransaction)
+	}
+	return c
+}
+
+// Begin begin a transaction
+func (s *DB) BeginTx(ctx context.Context, opt *sql.TxOptions) *DB {
+	c := s.clone()
+	if db, ok := c.db.(sqlDb); ok && db != nil {
+		tx, err := db.BeginTx(ctx, opt)
 		c.db = interface{}(tx).(SQLCommon)
 
 		c.dialect.SetDB(c.db)
