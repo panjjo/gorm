@@ -5,8 +5,8 @@ package gorm
 //      gorm.Model
 //    }
 type Model struct {
-	ID        uint `gorm:"primary_key"`
-	CreatedAt int64
-	UpdatedAt int64
-	DeletedAt *int64 `sql:"index"`
+	ID        uint   `json:"id" gorm:"primary_key"`
+	CreatedAt int64  `json:"addtime" gorm:"column:addtime"`
+	UpdatedAt int64  `json:"uptime" gorm:"column:uptime"`
+	DeletedAt *int64 `json:"deltime" sql:"index" gorm:"column:deltime"`
 }
