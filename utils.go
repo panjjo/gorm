@@ -17,7 +17,7 @@ import (
 //    gorm.NowFunc = func() time.Time {
 //      return time.Now().UTC()
 //    }
-var NowFunc = func() time.Time {
+var NowFunc = func() interface{} {
 	return time.Now()
 }
 

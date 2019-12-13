@@ -375,7 +375,7 @@ func (scope *Scope) Raw(sql string) *Scope {
 
 // Exec perform generated SQL
 func (scope *Scope) Exec() *Scope {
-	defer scope.trace(scope.db.nowFunc())
+	defer scope.trace(NowFunc().(time.Time))
 
 	if !scope.HasError() {
 		if result, err := scope.SQLDB().Exec(scope.SQL, scope.SQLVars...); scope.Err(err) == nil {
@@ -953,7 +953,7 @@ func (scope *Scope) updatedAttrsWithValues(value interface{}) (results map[strin
 }
 
 func (scope *Scope) row() *sql.Row {
-	defer scope.trace(scope.db.nowFunc())
+	defer scope.trace(NowFunc().(time.Time))
 
 	result := &RowQueryResult{}
 	scope.InstanceSet("row_query_result", result)
@@ -963,7 +963,7 @@ func (scope *Scope) row() *sql.Row {
 }
 
 func (scope *Scope) rows() (*sql.Rows, error) {
-	defer scope.trace(scope.db.nowFunc())
+	defer scope.trace(NowFunc().(time.Time))
 
 	result := &RowsQueryResult{}
 	scope.InstanceSet("row_query_result", result)

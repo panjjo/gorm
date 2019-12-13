@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"time"
 )
 
 // Define callbacks for querying
@@ -25,7 +26,7 @@ func queryCallback(scope *Scope) {
 		return
 	}
 
-	defer scope.trace(scope.db.nowFunc())
+	defer scope.trace(NowFunc().(time.Time))
 
 	var (
 		isSlice, isPtr bool
